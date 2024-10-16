@@ -348,6 +348,7 @@ void IndexIVF::search(
 
     if ((parallel_mode & ~PARALLEL_MODE_NO_HEAP_INIT) == 0) {
         int nt = std::min(omp_get_max_threads(), int(n));
+        nt =1;
         std::vector<IndexIVFStats> stats(nt);
         std::mutex exception_mutex;
         std::string exception_string;

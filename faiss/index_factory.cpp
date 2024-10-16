@@ -775,6 +775,10 @@ std::unique_ptr<Index> index_factory_sub(
                    code_string.c_str(),
                    hnsw_M);
         }
+        printf("parsing HNSW string %s code_string=%s hnsw_M=%d\n",
+                description.c_str(),
+                code_string.c_str(),
+                hnsw_M);
 
         IndexHNSW* index = parse_IndexHNSW(code_string, d, metric, hnsw_M);
         FAISS_THROW_IF_NOT_FMT(
