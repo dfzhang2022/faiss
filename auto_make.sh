@@ -8,3 +8,9 @@ make -C build demo_IVFFlat_sift1M_build
 make -C build demo_HNSW_sift1M_search
 
 make -C build demo_HNSW_sift1M_build
+
+make -C build demo_sift1M_build
+
+make -C build demo_sift1M_search
+
+make -C build demo_gist1M_build

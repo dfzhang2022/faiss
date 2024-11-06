@@ -72,11 +72,11 @@ double elapsed() {
     return tv.tv_sec + tv.tv_usec * 1e-6;
 }
 
-int main() {
+void build_HNSW_index(){
     double t0 = elapsed();
 
     // this is typically the fastest one.
-    const char* index_key = "IVF4096,Flat";
+    const char* index_key = "HNSW,Flat";
     std::string index_file_name = "";
 
     faiss::index_factory_verbose = 1;
@@ -89,7 +89,7 @@ int main() {
         printf("[%.3f s] Loading train set\n", elapsed() - t0);
 
         size_t nt;
-        float* xt = fvecs_read("sift1M/sift_learn.fvecs", &d, &nt);
+        float* xt = fvecs_read("gist1M/gist_learn.fvecs", &d, &nt);
 
         printf("[%.3f s] Preparing index \"%s\" d=%ld\n",
                elapsed() - t0,
@@ -107,7 +107,7 @@ int main() {
         printf("[%.3f s] Loading database\n", elapsed() - t0);
 
         size_t nb, d2;
-        float* xb = fvecs_read("sift1M/sift_base.fvecs", &d2, &nb);
+        float* xb = fvecs_read("gist1M/gist_base.fvecs", &d2, &nb);
         assert(d == d2 || !"dataset does not have same dimension as train set");
 
         printf("[%.3f s] Indexing database, size %ld*%ld\n",
@@ -121,10 +121,82 @@ int main() {
     }
 
     // Save the built index to disk
-    faiss::write_index(index, "sift1M/sift1M_IVFFlat_index.faissindex");
+    faiss::write_index(index, "gist1M/gist1M_HNSW_index.faissindex");
     printf("[%.3f s] Saved index to file.\n",
                elapsed() - t0);
 
     delete index;
+
+
+}
+
+
+void build_IVFFlat_index(){
+    double t0 = elapsed();
+
+    // this is typically the fastest one.
+    const char* index_key = "IVF4096,Flat";
+    std::string index_file_name = "";
+
+    faiss::index_factory_verbose = 1;
+
+    faiss::Index* index;
+
+    size_t d;
+
+    {
+        printf("[%.3f s] Loading train set\n", elapsed() - t0);
+
+        size_t nt;
+        float* xt = fvecs_read("gist1M/gist_learn.fvecs", &d, &nt);
+
+        printf("[%.3f s] Preparing index \"%s\" d=%ld\n",
+               elapsed() - t0,
+               index_key,
+               d);
+        index = faiss::index_factory(d, index_key);
+
+        printf("[%.3f s] Training on %ld vectors\n", elapsed() - t0, nt);
+
+        index->train(nt, xt);
+        delete[] xt;
+    }
+
+    {
+        printf("[%.3f s] Loading database\n", elapsed() - t0);
+
+        size_t nb, d2;
+        float* xb = fvecs_read("gist1M/gist_base.fvecs", &d2, &nb);
+        assert(d == d2 || !"dataset does not have same dimension as train set");
+
+        printf("[%.3f s] Indexing database, size %ld*%ld\n",
+               elapsed() - t0,
+               nb,
+               d);
+
+        index->add(nb, xb);
+
+        delete[] xb;
+    }
+
+    // Save the built index to disk
+    faiss::write_index(index, "gist1M/gist1M_IVFFlat_index.faissindex");
+    printf("[%.3f s] Saved index to file.\n",
+               elapsed() - t0);
+
+    delete index;
+
+
+}
+
+
+int main() {
+    
+    faiss::index_factory_verbose = 1;
+    
+    build_HNSW_index();
+
+    build_IVFFlat_index();
+    
     return 0;
 }
