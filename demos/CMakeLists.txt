@@ -28,6 +28,8 @@ target_link_libraries(demo_residual_quantizer PRIVATE faiss)
 add_executable(demo_IVFFlat_sift1M_search EXCLUDE_FROM_ALL demo_IVFFlat_sift1M_search.cpp)
 target_link_libraries(demo_IVFFlat_sift1M_search PRIVATE faiss)
 
+add_executable(demo_IVFFlat_gist1M_search EXCLUDE_FROM_ALL demo_IVFFlat_gist1M_search.cpp)
+target_link_libraries(demo_IVFFlat_gist1M_search PRIVATE faiss)
 
 add_executable(demo_IVFFlat_sift1M_build EXCLUDE_FROM_ALL demo_IVFFlat_sift1M_build.cpp)
 target_link_libraries(demo_IVFFlat_sift1M_build PRIVATE faiss)
@@ -36,6 +38,8 @@ target_link_libraries(demo_IVFFlat_sift1M_build PRIVATE faiss)
 add_executable(demo_HNSW_sift1M_search EXCLUDE_FROM_ALL demo_HNSW_sift1M_search.cpp)
 target_link_libraries(demo_HNSW_sift1M_search PRIVATE faiss)
 
+add_executable(demo_HNSW_gist1M_search EXCLUDE_FROM_ALL demo_HNSW_gist1M_search.cpp)
+target_link_libraries(demo_HNSW_gist1M_search PRIVATE faiss)
 
 add_executable(demo_HNSW_sift1M_build EXCLUDE_FROM_ALL demo_HNSW_sift1M_build.cpp)
 target_link_libraries(demo_HNSW_sift1M_build PRIVATE faiss)
