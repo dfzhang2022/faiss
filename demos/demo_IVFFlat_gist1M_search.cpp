@@ -133,26 +133,28 @@ int main() {
 
     { // Perform a 100-loop times seach to using perf
         int loop_cnt = 0;
-        printf("[%.3f s] Perform 1000-times search on %ld queries\n",
+        int loop_times = 10000;
+        printf("[%.3f s] Perform %d-times search on %ld queries\n",
                elapsed() - t0,
+                loop_times,
                nq);
 
         // output buffers
         faiss::idx_t* I = new faiss::idx_t[nq * k];
         float* D = new float[nq * k];
-
-        for(;loop_cnt<1000;loop_cnt++){
+        for(;loop_cnt<loop_times;loop_cnt++){
             index->search(nq, xq, k, D, I);
-            if(loop_cnt % 10 == 0){
-                printf("[%.3f s] Complete %dth search on %ld queries\n",    
+            if(loop_cnt % (loop_times/10) == 0){
+                printf("[%.3f s] Complete %d percent search on %ld queries\n",    
                     elapsed() - t0,
-                    loop_cnt,
+                    loop_cnt*100/loop_times,
                     nq);
             }
         
         }
-        printf("[%.3f s] Completed all 1000-times search on %ld queries\n",
+        printf("[%.3f s] Completed all %d-times search on %ld queries\n",
                 elapsed() - t0,
+                loop_times,
                 nq);
 
         delete[] I;
