@@ -4,6 +4,9 @@
 # This source code is licensed under the BSD-style license found in the
 # LICENSE file in the root directory of this source tree.
 
+find_package(Boost COMPONENTS program_options)
+
+
 add_executable(demo_imi_flat EXCLUDE_FROM_ALL demo_imi_flat.cpp)
 target_link_libraries(demo_imi_flat PRIVATE faiss)
 
@@ -53,3 +56,7 @@ target_link_libraries(demo_sift1M_search PRIVATE faiss)
 
 add_executable(demo_gist1M_build EXCLUDE_FROM_ALL demo_gist1M_build.cpp)
 target_link_libraries(demo_gist1M_build PRIVATE faiss)
+
+
+add_executable(demo_gist1M_search EXCLUDE_FROM_ALL demo_gist1M_search.cpp)
+target_link_libraries(demo_gist1M_search PRIVATE faiss Boost::program_options)

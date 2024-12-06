@@ -132,16 +132,24 @@ int main() {
     // }
 
     { // Perform a 100-loop times seach to using perf
+
+        double loop_begin_time = elapsed();
+        double loop_duration = 1500;
         int loop_cnt = 0;
         int loop_times = 10000;
-        printf("[%.3f s] Perform %d-times search on %ld queries\n",
+        // printf("[%.3f s] Perform %d-times search on %ld queries\n",
+        //        elapsed() - t0,
+        //         loop_times,
+        //        nq);
+        printf("[%.3f s] Perform %.3f-duration search on %ld queries\n",
                elapsed() - t0,
-                loop_times,
-               nq);
+                loop_duration,
+                nq);
 
         // output buffers
         faiss::idx_t* I = new faiss::idx_t[nq * k];
         float* D = new float[nq * k];
+        /*
         for(;loop_cnt<loop_times;loop_cnt++){
             index->search(nq, xq, k, D, I);
             if(loop_cnt % (loop_times/10) == 0){
@@ -152,9 +160,31 @@ int main() {
             }
         
         }
-        printf("[%.3f s] Completed all %d-times search on %ld queries\n",
-                elapsed() - t0,
-                loop_times,
+        */
+        double tmp_time = elapsed();
+        for(;elapsed() - loop_begin_time<loop_duration;){
+            index->search(nq, xq, k, D, I);
+            if(elapsed()-tmp_time > 10){
+                printf("[%.3f s] Complete another 10s search on %ld queries\n",    
+                    elapsed() - t0,
+                    nq);
+                tmp_time = elapsed();
+            }
+            // if(loop_cnt % (loop_times/10) == 0){
+            //     printf("[%.3f s] Complete %d percent search on %ld queries\n",    
+            //         elapsed() - t0,
+            //         loop_cnt*100/loop_times,
+            //         nq);
+            // }
+        
+        }
+        // printf("[%.3f s] Completed all %d-times search on %ld queries\n",
+        //         elapsed() - t0,
+        //         loop_times,
+        //         nq);
+        printf("[%.3f s] Completed all %.3f-duration search on %ld queries\n",
+               elapsed() - t0,
+                loop_duration,
                 nq);
 
         delete[] I;

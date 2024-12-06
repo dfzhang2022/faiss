@@ -11,12 +11,13 @@ fi
 timestamp=$(date +"%Y%m%d_%H%M%S")
 
 # 定义相关目录和程序路径
-demo_program="./build/demos/demo_sift1M_search"
+demo_program="demo_gist1M_search"
+demo_program_path="./build/demos/${demo_program}"
 perf_data_dir="./perf_data"
-output_perf="${perf_data_dir}/perf_${timestamp}.data"
-output_script="${perf_data_dir}/out_${timestamp}.perf"
-output_folded="${perf_data_dir}/out_${timestamp}.folded"
-output_svg="${perf_data_dir}/flamegraph_${timestamp}.svg"
+output_perf="${perf_data_dir}/${demo_program}_perf_${timestamp}.data"
+output_script="${perf_data_dir}/${demo_program}_out_${timestamp}.perf"
+output_folded="${perf_data_dir}/${demo_program}_out_${timestamp}.folded"
+output_svg="${perf_data_dir}/${demo_program}_flamegraph_${timestamp}.svg"
 
 # 检查FlameGraph相关的脚本是否存在
 if [ ! -f "$FlameGraphPath/stackcollapse-perf.pl" ] || [ ! -f "$FlameGraphPath/flamegraph.pl" ]; then
@@ -40,7 +41,7 @@ mkdir -p "$perf_data_dir"
 
 # 获取指定进程的PID
 # PID=$(pgrep -f demo_HNSW_sift1M_search )
-PID=$(pgrep -f demo_IVFFlat_sift1M_search )
+PID=$(pgrep -f ${demo_program})
 # PID=$(pgrep -f "$param")
 # echo "$PID"
 # exit 1

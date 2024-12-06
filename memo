@@ -1,0 +1,3 @@
+./build/demos/demo_HNSW_gist1M_search
+
+./build/demos/demo_IVFFlat_gist1M_search
