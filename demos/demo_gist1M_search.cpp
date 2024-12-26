@@ -119,6 +119,7 @@ int main(int argc, char **argv) {
     float* xq;
 
     // Load the pre-built index from disk
+    std::cout<<"Loading index from disk... path: "<<index_file_path<<std::endl;
     faiss::Index * index = faiss::read_index(index_file_path.c_str());
 
     {
@@ -154,10 +155,11 @@ int main(int argc, char **argv) {
 
     { // Perform a {execute_duration} seach to using perf
 
-        double loop_begin_time = elapsed();
+        
         double loop_duration = execute_duration;
+        size_t execute_cnt = 0;
 
-        printf("[%.3f s] Perform %.3f(s)-duration search on %ld queries\n",
+        printf("[%.3f s] Perform %.1f(s)-duration search on %ld queries\n",
                elapsed() - t0,
                 loop_duration,
                 nq);
@@ -166,22 +168,26 @@ int main(int argc, char **argv) {
         faiss::idx_t* I = new faiss::idx_t[nq * k];
         float* D = new float[nq * k];
 
-        double tmp_time = elapsed();
+        double loop_begin_time = elapsed();
+        double tmp_time = loop_begin_time;
         for(;elapsed() - loop_begin_time<loop_duration;){
             index->search(nq, xq, k, D, I);
+            execute_cnt++;
             if(elapsed()-tmp_time > 30){
-                printf("[%.3f s] Complete another 30s search on %ld queries\n",    
+                printf("[%.3f s] Complete %.3fs search on %ld queries\n",    
                     elapsed() - t0,
+                    elapsed() - loop_begin_time,
                     nq);
                 tmp_time = elapsed();
             }
         
         }
 
-        printf("[%.3f s] Completed all %.3f-duration search on %ld queries\n",
+        printf("[%.3f s] Completed all %.3f-duration search on %ld queries for %ld times.\n",
                elapsed() - t0,
                 loop_duration,
-                nq);
+                nq,
+                execute_cnt);
 
         delete[] I;
         delete[] D;
