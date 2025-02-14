@@ -1,3 +1,12 @@
 ./build/demos/demo_HNSW_gist1M_search
 
 ./build/demos/demo_IVFFlat_gist1M_search
+
+
+numactl --physcpubind=0-31 ./build/demos/demo_gist1M_search --index_file_path ./gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 1000
+
+numactl --physcpubind=0-31 ./build/demos/demo_gist1M_search --index_file_path ./gist1M/gist1M_IVFFlat_index_1.faissindex --execute_duration 1000
+
+
+
+Rtx4090@187

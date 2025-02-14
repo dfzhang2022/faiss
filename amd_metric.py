@@ -172,7 +172,7 @@ def monitor_perf(pid=0, duration=10, case_name = '', save_local = False, sudo = 
     if not save_local:
         batch_save_lark(data, table_name)
     else:
-        save_data_to_csv(data, f"{case_name}_perf_data.csv")
+        save_data_to_csv(data, f"result/{case_name}_perf_data.csv")
     return data
 
 def monitor_system_usage(duration=10, case_name = '', save_local = False):
@@ -204,7 +204,7 @@ def monitor_system_usage(duration=10, case_name = '', save_local = False):
     if not save_local:
         batch_save_lark(data, 'tblNpZMhfepLIIqa')
     else:
-        save_data_to_csv(data, f"{case_name}_system_usage_data.csv")
+        save_data_to_csv(data, f"result/{case_name}_system_usage_data.csv")
     return data
 
 def get_case_name():
@@ -246,7 +246,8 @@ def monitor_memory_bandwidth(duration=10, case_name = '', save_local = False, su
         # 运行 pqos 命令并捕获输出
         print('Memory BandWith Monitoring progress...')
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
+        print(command)
+        # sudo pqos -m all:0-191 -t 600 
         # 检查命令是否执行成功
         if result.returncode == 0:
             print("Memory Bandwidth Monitoring Results Captured")
@@ -258,7 +259,7 @@ def monitor_memory_bandwidth(duration=10, case_name = '', save_local = False, su
             if not save_local:
                 batch_save_lark(data, 'tbl5IetG3NXe6GFT')
             else:
-                save_data_to_csv(data, f"{case_name}_mem_bandwidth_data.csv")
+                save_data_to_csv(data, f"result/{case_name}_mem_bandwidth_data.csv")
         else:
             print("Error in pqos command:")
             print(result.stderr)
@@ -322,14 +323,20 @@ def parse_pqos_output(output, case_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run performance monitoring.')
     parser.add_argument('-d', '--duration', type=int, default=10, help='Duration for performance monitoring in seconds')
+    parser.add_argument('-n', '--name', type=str, default="default", help='User defined case name')
     parser.add_argument('--pid', type=int, required=False, default=0, help='PID of the process to monitor')
     parser.add_argument('--save-local', action='store_true', default=False, help='Save data locally instead of remotely')
     parser.add_argument('-p', '--perf', action='store_true', default=False, help='Run perf monitoring')
     parser.add_argument('-s', '--system', action='store_true', default=False, help='Run system usage monitoring')
     parser.add_argument('-m', '--memory', action='store_true', default=False, help='Run memory bandwidth monitoring')
+    parser.add_argument('-f', '--flamegraph', action='store_true', default=False, help='Plotting flamegraph')
     parser.add_argument('--no-sudo', action='store_true', default=False, help='Run without sudo')
     args = parser.parse_args()
-    case_name = get_case_name()
+    if args.name == "default":
+        case_name = get_case_name()
+    else:
+        case_name = get_case_name()+args.name
+    # case_name = get_case_name()
     print(f'case_name: {case_name}')
     thread_list = []
     if not args.save_local:
