@@ -20,7 +20,12 @@
 #include <iostream>
 
 #include <boost/program_options.hpp>
+
+#include "faiss/utils/FvecL2sqrLogger.h"
+
 namespace po = boost::program_options;
+
+std::string log_file_name = "operator_breakdown/data/distance_compute/L2/replay_back.dat";
 
 const std::string make_program_description(const char *executable_name, const char *description)
 {
@@ -155,7 +160,7 @@ int main(int argc, char **argv) {
 
     { // Perform a {execute_duration} seach to using perf
 
-        
+        FvecL2sqrLogger::instance().switch_on();
         double loop_duration = execute_duration;
         size_t execute_cnt = 0;
 
@@ -173,6 +178,9 @@ int main(int argc, char **argv) {
         for(;elapsed() - loop_begin_time<loop_duration;){
             index->search(nq, xq, k, D, I);
             execute_cnt++;
+            if(execute_cnt > 0 ){
+                FvecL2sqrLogger::instance().switch_off();
+            }
             if(elapsed()-tmp_time > 30){
                 printf("[%.3f s] Complete %.3fs search on %ld queries\n",    
                     elapsed() - t0,
@@ -192,6 +200,12 @@ int main(int argc, char **argv) {
         delete[] I;
         delete[] D;
     }
+    FvecL2sqrLogger::instance().switch_on();
+    FvecL2sqrLogger::instance().dump_to_file(log_file_name);
+    FvecL2sqrLogger::instance().clear();
+    auto a = FvecL2sqrLogger::instance().load_from_file(log_file_name);
+    FvecL2sqrLogger::instance().switch_off();
+    std::cout<<"load size: "<<a.size()<<std::endl;
 
     delete[] xq;
     delete[] gt;

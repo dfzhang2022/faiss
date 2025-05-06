@@ -19,6 +19,8 @@
 #include <faiss/utils/utils.h>
 #include <cstring>
 
+#include "faiss/utils/FvecL2sqrLogger.h"
+
 namespace faiss {
 
 IndexFlat::IndexFlat(idx_t d, MetricType metric)
@@ -150,6 +152,7 @@ struct FlatL2Dis : FlatCodesDistanceComputer {
         float dp1 = 0;
         float dp2 = 0;
         float dp3 = 0;
+        FvecL2sqrLogger::instance().record(q, y0, y1, y2, y3, d);
         fvec_L2sqr_batch_4(q, y0, y1, y2, y3, d, dp0, dp1, dp2, dp3);
         dis0 = dp0;
         dis1 = dp1;

@@ -17,6 +17,9 @@
 
 #include <faiss/impl/platform_macros.h>
 
+#include "faiss/utils/FvecL2sqrLogger.h"
+
+
 #ifdef __AVX2__
 #include <immintrin.h>
 
@@ -898,7 +901,7 @@ HNSWStats HNSW::search(
             vt.advance();
         }
     }
-
+    // FvecL2sqrLogger::instance().dump_to_file("log.bin");
     return stats;
 }
 

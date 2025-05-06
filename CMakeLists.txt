@@ -81,6 +81,7 @@ if(FAISS_ENABLE_C_API)
 endif()
 
 add_subdirectory(demos)
+add_subdirectory(operator_breakdown)
 add_subdirectory(benchs)
 add_subdirectory(tutorial/cpp)
 
