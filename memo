@@ -8,5 +8,35 @@ numactl --physcpubind=0-31 ./build/demos/demo_gist1M_search --index_file_path ./
 numactl --physcpubind=0-31 ./build/demos/demo_gist1M_search --index_file_path ./gist1M/gist1M_IVFFlat_index_1.faissindex --execute_duration 1000
 
 
+numactl --physcpubin=0-39 ./build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --executing_duration 900
+
+
+numactl --physcpubin=0-39 ./build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 900
+
 
 Rtx4090@187
+
+
+$FlameGraphPath/stackcollapse-perf.pl /home/user/dfzhang/demo_gist1M_search_out_20250213_205444.perf > /home/user/dfzhang/faiss/perf_data/kunpeng.folded
+
+$FlameGraphPath/flamegraph.pl /home/user/dfzhang/faiss/perf_data/kunpeng.folded > /home/user/dfzhang/faiss/perf_data/kunpeng.svg
+
+
+
+cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+
+
+0506
+
+cmake配置
+cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+
+进行编译
+./auto_make.sh
+
+运行并记录回放数据
+/build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 900
+
+./build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 10 --collect_trace false
+
+./build/operator_breakdown/executable/distance_compute/L2/dis_cmp_l2
