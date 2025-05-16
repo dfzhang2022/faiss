@@ -83,6 +83,7 @@ int main(int argc, char **argv) {
     double t0 = elapsed();
 
     std::string data_type, dist_fn, index_file_path;
+    bool collect_trace = false;
 
     uint32_t execute_duration;
     po::options_description desc{
@@ -95,6 +96,9 @@ int main(int argc, char **argv) {
         // Required parameters
         po::options_description required_configs("Required");
         required_configs.add_options()("index_file_path", po::value<std::string>(&index_file_path)->required(),"path of index file");
+        required_configs.add_options()("collect_trace",
+                                     po::value<bool>()->default_value(false),
+                                     "Whether to collect trace data during execution");
 
         // Optional parameters
         po::options_description optional_configs("Optional");
@@ -159,8 +163,11 @@ int main(int argc, char **argv) {
 
 
     { // Perform a {execute_duration} seach to using perf
-
-        FvecL2sqrLogger::instance().switch_on();
+        if(collect_trace){
+            FvecL2sqrLogger::instance().switch_on();
+        }else{
+            FvecL2sqrLogger::instance().switch_off();
+        }
         double loop_duration = execute_duration;
         size_t execute_cnt = 0;
 
@@ -200,12 +207,14 @@ int main(int argc, char **argv) {
         delete[] I;
         delete[] D;
     }
-    FvecL2sqrLogger::instance().switch_on();
-    FvecL2sqrLogger::instance().dump_to_file(log_file_name);
-    FvecL2sqrLogger::instance().clear();
-    auto a = FvecL2sqrLogger::instance().load_from_file(log_file_name);
-    FvecL2sqrLogger::instance().switch_off();
-    std::cout<<"load size: "<<a.size()<<std::endl;
+    if(collect_trace){
+        FvecL2sqrLogger::instance().switch_on();
+        FvecL2sqrLogger::instance().dump_to_file(log_file_name);
+        FvecL2sqrLogger::instance().clear();
+        auto a = FvecL2sqrLogger::instance().load_from_file(log_file_name);
+        FvecL2sqrLogger::instance().switch_off();
+        std::cout<<"load size: "<<a.size()<<std::endl;
+    }
 
     delete[] xq;
     delete[] gt;
