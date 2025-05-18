@@ -19,3 +19,7 @@
 # make -C build demo_gist1M_build
 
 make -C build demo_gist1M_search
+make -C build dis_cmp_l2
+make -C build dis_cmp_ip
+
+
