@@ -1,2 +1,1 @@
-add_subdirectory(distance_compute/L2)
-add_subdirectory(distance_compute/IP)
+add_subdirectory(distance_compute)

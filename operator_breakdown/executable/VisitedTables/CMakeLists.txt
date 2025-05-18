@@ -1,0 +1,4 @@
+find_package(Boost COMPONENTS program_options)
+
+add_executable(visited_tables EXCLUDE_FROM_ALL visited_tables.cpp)
+target_link_libraries(visited_tables PRIVATE faiss)

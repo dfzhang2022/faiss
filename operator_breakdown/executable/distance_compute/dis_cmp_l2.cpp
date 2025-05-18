@@ -1,3 +1,4 @@
+#undef _OPENMP  // 禁用 OpenMP
 #include <faiss/utils/distances.h>
 #include <faiss/utils/simdlib_emulated.h>
 
@@ -12,22 +13,13 @@
 
 #include "faiss/utils/FvecL2sqrLogger.h"
 
-std::string log_file_name = "operator_breakdown/data/distance_compute/L2/replay_back.dat";
-
-// #define FAISS_PRAGMA_IMPRECISE_LOOP
-// #define FAISS_PRAGMA_IMPRECISE_FUNCTION_BEGIN \
-//     _Pragma("GCC push_options") \
-//     _Pragma("GCC optimize
-//     (\"unroll-loops,associative-math,no-signed-zeros\")")
-// #define FAISS_PRAGMA_IMPRECISE_FUNCTION_END \
-//     _Pragma("GCC pop_options")
+// Usage: ./dis_cmp_l2 <path_to_trace_file>
 
 double elapsed() {
     struct timeval tv;
     gettimeofday(&tv, nullptr);
     return tv.tv_sec + tv.tv_usec * 1e-6;
 }
-
 
 namespace dbbench {
 
@@ -83,27 +75,39 @@ void fvec_L2sqr_batch_4(
 FAISS_PRAGMA_IMPRECISE_FUNCTION_END
 
 } // namespace dbbench
-float a[2] = {1,2};
-float b[2] = {3,4};
 
 int main(int argc, const char** argv) {
-    float res = dbbench::fvec_L2sqr(a, b, 2);
-    printf("%f\n", res);
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <log_file>" << std::endl;
+        return 1;
+    }
+
+    std::string log_file_name = argv[1];
+
     FvecL2sqrLogger::instance().switch_on();
     auto a = FvecL2sqrLogger::instance().load_from_file(log_file_name);
-    std::cout<<"load size: "<<a.size()<<std::endl;
+    std::cout << "load size: " << a.size() << std::endl;
 
     int cnt = 0;
     double loop_begin_time = elapsed();
-    for(auto entry: a){
+    for (auto entry : a) {
         float dis0, dis1, dis2, dis3;
-        dbbench::fvec_L2sqr_batch_4(entry.x.data(),entry.y0.data(),entry.y1.data(),entry.y2.data(),entry.y3.data(),entry.d,dis0,dis1,dis2,dis3);
+        dbbench::fvec_L2sqr_batch_4(
+                entry.x.data(),
+                entry.y0.data(),
+                entry.y1.data(),
+                entry.y2.data(),
+                entry.y3.data(),
+                entry.d,
+                dis0,
+                dis1,
+                dis2,
+                dis3);
         cnt++;
     }
 
-    std::cout<<"cnt size: "<<cnt<<std::endl;
-    std::cout<<"Time : "<<elapsed()-loop_begin_time<<std::endl;
-
+    std::cout << "cnt size: " << cnt << std::endl;
+    std::cout << "Time : " << elapsed() - loop_begin_time << std::endl;
 
     return 0;
 }

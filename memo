@@ -14,7 +14,6 @@ numactl --physcpubin=0-39 ./build/demos/demo_gist1M_search --index_file_path gis
 numactl --physcpubin=0-39 ./build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 900
 
 
-Rtx4090@187
 
 
 $FlameGraphPath/stackcollapse-perf.pl /home/user/dfzhang/demo_gist1M_search_out_20250213_205444.perf > /home/user/dfzhang/faiss/perf_data/kunpeng.folded
@@ -29,7 +28,7 @@ cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_
 0506
 
 cmake配置
-cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBLA_STATIC=ON
 
 进行编译
 ./auto_make.sh
@@ -40,3 +39,4 @@ cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_
 ./build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 10 --collect_trace false
 
 ./build/operator_breakdown/executable/distance_compute/L2/dis_cmp_l2
+
