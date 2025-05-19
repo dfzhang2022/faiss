@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #include "faiss/utils/FvecL2sqrLogger.h"
 
@@ -20,7 +21,10 @@ double elapsed() {
     gettimeofday(&tv, nullptr);
     return tv.tv_sec + tv.tv_usec * 1e-6;
 }
-
+bool fileExists(const std::string& path) {
+    struct stat buffer;
+    return (stat(path.c_str(), &buffer) == 0);
+}
 namespace dbbench {
 
 /*********************************************************
@@ -85,8 +89,15 @@ int main(int argc, const char** argv) {
     std::string log_file_name = argv[1];
 
     FvecL2sqrLogger::instance().switch_on();
+    double load_begin_time = elapsed();
+    if (!fileExists(log_file_name)) {
+        std::cerr << "Error: Log file '" << log_file_name << "' does not exist!" << std::endl;
+        return 0;
+    }
+    std::cout << "Log file exists. Proceeding... File path:"<<log_file_name << std::endl;
     auto a = FvecL2sqrLogger::instance().load_from_file(log_file_name);
     std::cout << "load size: " << a.size() << std::endl;
+    std::cout << "Time : " << elapsed() - load_begin_time << std::endl;
 
     int cnt = 0;
     double loop_begin_time = elapsed();
@@ -106,7 +117,7 @@ int main(int argc, const char** argv) {
         cnt++;
     }
 
-    std::cout << "cnt size: " << cnt << std::endl;
+    std::cout << "computation size: " << cnt << std::endl;
     std::cout << "Time : " << elapsed() - loop_begin_time << std::endl;
 
     return 0;
