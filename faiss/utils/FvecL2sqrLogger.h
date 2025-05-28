@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <iostream>
+#include <limits>
 
 class FvecL2sqrLogger {
 public:
@@ -17,8 +18,23 @@ public:
         static FvecL2sqrLogger inst;
         return inst;
     }
-    void switch_on() { logger_switched_on_ = true; }
-    void switch_off() { logger_switched_on_ = false; }
+    void switch_on() { 
+        logger_switched_on_ = true; 
+    }
+    void switch_off() { 
+        logger_switched_on_ = false; 
+    }
+
+    // 设置收集条目数的上限（0表示不限制）
+    void set_max_entries(size_t max_entries) {
+        std::lock_guard<std::mutex> lock(mu_);
+        max_entries_ = max_entries;
+    }
+
+    size_t get_max_entries() const {
+        std::lock_guard<std::mutex> lock(mu_);
+        return max_entries_;
+    }
 
     // 记录一次调用输入
     void record(const float* x,
@@ -30,6 +46,14 @@ public:
     {
         if(!logger_switched_on_){
             return;
+        }
+        {
+            std::lock_guard<std::mutex> lock(mu_);
+            if (max_entries_ > 0 && buffer_.size() >= max_entries_) {
+                logger_switched_on_ = false;
+                // std::cout << "Logger reached max_entries (" << max_entries_ << "), auto switch off." << std::endl;
+                return;
+            }
         }
         Entry e;
         e.d = d;
@@ -138,5 +162,5 @@ private:
     mutable std::mutex mu_;
     std::vector<Entry> buffer_;
     bool logger_switched_on_ = false;
-    
+    size_t max_entries_ = 0; // 0表示不限制
 };
