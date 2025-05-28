@@ -25,7 +25,7 @@
 
 namespace po = boost::program_options;
 
-std::string log_file_name = "operator_breakdown/data/distance_compute/L2/replay_back.dat";
+std::string log_root_path = "./dbbench_data/";
 
 const std::string make_program_description(const char *executable_name, const char *description)
 {
@@ -36,8 +36,6 @@ const std::string make_program_description(const char *executable_name, const ch
         .append(executable_name)
         .append(" [OPTIONS]");
 }
-
-
 
 double elapsed() {
     struct timeval tv;
@@ -52,7 +50,8 @@ float* fvecs_read(const char* fname, size_t* d_out, size_t* n_out) {
         abort();
     }
     int d;
-    fread(&d, 1, sizeof(int), f);
+    size_t nread = fread(&d, 1, sizeof(int), f);
+    assert(nread == sizeof(int) || !"could not read dimension from file");
     assert((d > 0 && d < 1000000) || !"unreasonable dimension");
     fseek(f, 0, SEEK_SET);
     struct stat st;
@@ -84,6 +83,7 @@ int main(int argc, char **argv) {
 
     std::string data_type, dist_fn, index_file_path;
     bool collect_trace = false;
+    size_t logger_bound = 0; // 新增logger_bound参数，默认值为0 表示无上限
 
     uint32_t execute_duration;
     po::options_description desc{
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
         po::options_description required_configs("Required");
         required_configs.add_options()("index_file_path", po::value<std::string>(&index_file_path)->required(),"path of index file");
         required_configs.add_options()("collect_trace",
-                                     po::value<bool>()->default_value(false),
+                                     po::value<bool>(&collect_trace)->default_value(false),
                                      "Whether to collect trace data during execution");
 
         // Optional parameters
@@ -105,6 +105,16 @@ int main(int argc, char **argv) {
         optional_configs.add_options()("execute_duration",
                                        po::value<uint32_t>(&execute_duration)->default_value(600),
                                        "Duration that you want search been performing(s).");
+        // 新增日志目录参数
+        optional_configs.add_options()("log_root_path",
+                                       po::value<std::string>(&log_root_path)->default_value(
+                                        "./dbbench_data/"),
+                                       "Path to output log file (default: ./dbbench_data/)");
+        // 新增logger_bound参数
+        optional_configs.add_options()("logger_bound",
+                                       po::value<size_t>(&logger_bound)->default_value(0),
+                                       "Maximum number of entries to record in logger (default: 0, meaning unlimited)");
+
         // Merge required and optional parameters
         desc.add(required_configs).add(optional_configs);
 
@@ -124,12 +134,16 @@ int main(int argc, char **argv) {
         return -1;
     }
 
+    // 设置logger的最大条数
+    FvecL2sqrLogger::instance().set_max_entries(logger_bound);
+
     size_t d, nq;
     float* xq;
 
     // Load the pre-built index from disk
-    std::cout<<"Loading index from disk... path: "<<index_file_path<<std::endl;
+    printf("[%.3f s] Loading index from disk... path: %s\n", elapsed() - t0, index_file_path.c_str());
     faiss::Index * index = faiss::read_index(index_file_path.c_str());
+    printf("[%.3f s] Loaded index completed\n", elapsed() - t0);
 
     {
         printf("[%.3f s] Loading queries\n", elapsed() - t0);
@@ -154,7 +168,7 @@ int main(int argc, char **argv) {
         assert(nq2 == nq || !"incorrect nb of ground truth entries");
 
         gt = new faiss::idx_t[k * nq];
-        for (int i = 0; i < k * nq; i++) {
+        for (size_t i = 0; i < k * nq; i++) {
             gt[i] = gt_int[i];
         }
         delete[] gt_int;
@@ -164,6 +178,7 @@ int main(int argc, char **argv) {
 
     { // Perform a {execute_duration} seach to using perf
         if(collect_trace){
+            std::cout<<"Log switch is on."<<std::endl;
             FvecL2sqrLogger::instance().switch_on();
         }else{
             FvecL2sqrLogger::instance().switch_off();
@@ -185,7 +200,7 @@ int main(int argc, char **argv) {
         for(;elapsed() - loop_begin_time<loop_duration;){
             index->search(nq, xq, k, D, I);
             execute_cnt++;
-            if(execute_cnt > 0 ){
+            if(execute_cnt > 2 ){
                 FvecL2sqrLogger::instance().switch_off();
             }
             if(elapsed()-tmp_time > 30){
@@ -209,11 +224,14 @@ int main(int argc, char **argv) {
     }
     if(collect_trace){
         FvecL2sqrLogger::instance().switch_on();
-        FvecL2sqrLogger::instance().dump_to_file(log_file_name);
+        FvecL2sqrLogger::instance().dump_to_file(log_root_path+"Dis_L2_10000.dat");
         FvecL2sqrLogger::instance().clear();
-        auto a = FvecL2sqrLogger::instance().load_from_file(log_file_name);
+        double load_begin_time = elapsed();
+        auto a = FvecL2sqrLogger::instance().load_from_file(log_root_path+"Dis_L2_10000.dat");
+        double load_end_time = elapsed();
         FvecL2sqrLogger::instance().switch_off();
-        std::cout<<"load size: "<<a.size()<<std::endl;
+        std::cout << "load size: " << a.size() << std::endl;
+        std::cout << "load time: " << (load_end_time - load_begin_time) << " s" << std::endl;
     }
 
     delete[] xq;

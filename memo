@@ -40,3 +40,8 @@ cmake -B build . -DFAISS_ENABLE_GPU=OFF -DFAISS_ENABLE_PYTHON=OFF -DCMAKE_BUILD_
 
 ./build/operator_breakdown/executable/distance_compute/L2/dis_cmp_l2
 
+./build/operator_breakdown/executable/distance_compute/dis_cmp_l2 ./operator_breakdown/data/distance_compute/L2/replay_back.dat
+
+./build/demos/demo_gist1M_search --index_file_path gist1M/gist1M_HNSW_index_1.faissindex --execute_duration 10 --collect_trace=true --logger_bound 100
+
+./build/operator_breakdown/executable/distance_compute/dis_cmp_l2 ./dbbench_data/Dis_L2_10000.dat

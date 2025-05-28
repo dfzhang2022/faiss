@@ -118,7 +118,9 @@ int main(int argc, const char** argv) {
     }
 
     std::cout << "computation size: " << cnt << std::endl;
-    std::cout << "Time : " << elapsed() - loop_begin_time << std::endl;
+    std::cout << std::fixed;
+    std::cout.precision(6); // 可根据需要调整小数位数
+    std::cout << "Time : " << static_cast<double>(elapsed() - loop_begin_time) << std::endl;
 
     return 0;
 }
